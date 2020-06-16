@@ -1,6 +1,8 @@
 const express = require('express')
 const consola = require('consola')
 const { Nuxt, Builder } = require('nuxt')
+const { check, validationResult } = require('express-validator')
+const bodyParser = require('body-parser')
 const app = express()
 
 // Import and Set Nuxt.js options
@@ -19,6 +21,20 @@ async function start() {
     const builder = new Builder(nuxt)
     await builder.build()
   }
+
+  app.use(bodyParser.json()) // for axios submitted data (JSON)
+  app.use(bodyParser.urlencoded({ extended: false })) // for html form submitted data (URLENCODED)
+
+  app.post('/api/users', [check('email').isEmail().normalizeEmail(),
+                          check('password').isLength({ min: 6 }) 
+                        ], (req, res) => {
+    const errors = validationResult(req)
+    if (!errors.isEmpty()) {
+      console.log(errors)
+      return res.status(422).json({ errors: errors.array() })
+    }
+    console.log(req.body);
+  })
 
   // Give nuxt middleware to express
   app.use(nuxt.render)
