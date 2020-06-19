@@ -9,6 +9,8 @@ const app = express()
 const config = require('../nuxt.config.js')
 config.dev = process.env.NODE_ENV !== 'production'
 
+const models = require('./models/index')
+
 async function start() {
   // Init Nuxt.js
   const nuxt = new Nuxt(config)
@@ -33,7 +35,11 @@ async function start() {
       console.log(errors)
       return res.status(422).json({ errors: errors.array() })
     }
+
     console.log(req.body);
+
+    models.User.create({email: req.body.email, password: req.body.password})
+
   })
 
   // Give nuxt middleware to express
